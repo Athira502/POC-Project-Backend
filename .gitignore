@@ -1,0 +1,29 @@
+# Python-related
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+env/
+*.env
+
+# Anaconda environments
+.conda/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# .env or configuration files (for security)
+.env
+
+# .pytest_cache
+.pytest_cache/
+
+# Local settings or IDE files (e.g., VSCode, PyCharm)
+.vscode/
+.idea/
+
+# SQLAlchemy database file
+*.db
