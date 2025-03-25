@@ -1,0 +1,1 @@
+ A SAP SM20 Log Parsing and Job Scheduling System built using React.js  and a FastAPI. It automates the processing of SAP SM20 security audit logs, allowing users to schedule and monitor log file processing.
