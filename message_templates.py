@@ -1,46 +1,3 @@
-# MESSAGE_TEMPLATES = {
-#
-#     "BUZ": {"audit_class": "Other Events", "message_severity": "High",
-#             "message_text": "> in program &A, line &B, event &C"},
-#     "CUL": {"audit_class": "Other Events", "message_severity": "High",
-#             "message_text": "Field content in debugger changed by user &A(&B): &C (&D)"},
-#     "CUM": {"audit_class": "Other Events", "message_severity": "High",
-#             "message_text": "Jump to ABAP Debugger by user &A(&B): &C (&D)"},
-#     "CUN": {"audit_class": "Other Events", "message_severity": "High",
-#             "message_text": "A process was stopped from the debugger by user &A(&B) (&D)"},
-#     "CUO": {"audit_class": "Other Events", "message_severity": "High",
-#             "message_text": "Explicit database operation in debugger by user &A(&B): &C (&D)"},
-#     "CUP": {"audit_class": "Other Events", "message_severity": "High",
-#             "message_text": "Non-exclusive debugging session started by user &A(&B) (&D)"},
-#     "CUY": {"audit_class": "Other Events", "message_severity": "Low", "message_text": "> &A"},
-#     "EU3": {"audit_class": "Other Events", "message_severity": "High",
-#             "message_text": "&A change documents deleted without archiving (&B)"},
-#     "FU2": {"audit_class": "Other Events", "message_severity": "Medium",
-#             "message_text": "Parsing of an XML data stream canceled for security reasons (reason = &A)"},
-#     "FUA": {"audit_class": "Other Events", "message_severity": "High", "message_text": "Audit alert: &A | &B &C &D"},
-#     "FU1": {"audit_class": "RFC Function Call", "message_severity": "Low",
-#             "message_text": "RFC function &B with dynamic destination &C was called in program &A"},
-#     "AUE": {"audit_class": "System Events", "message_severity": "High", "message_text": "Audit configuration changed"},
-#     "AUF": {"audit_class": "System Events", "message_severity": "High",
-#             "message_text": "Audit: Slot &A: Class &B, Severity &C, User &D, Client &E, &F"},
-#     "AUG": {"audit_class": "System Events", "message_severity": "High", "message_text": "Application server started"},
-#     "AUH": {"audit_class": "System Events", "message_severity": "High", "message_text": "Application server stopped"},
-#     "AUI": {"audit_class": "System Events", "message_severity": "High", "message_text": "Audit: Slot &A Inactive"},
-#     "AUJ": {"audit_class": "System Events", "message_severity": "High",
-#             "message_text": "Audit: Active status set to &1"},
-#     "EU1": {"audit_class": "System Events", "message_severity": "High",
-#             "message_text": "System changeability changed (&A to &B)"},
-#     "EU2": {"audit_class": "System Events", "message_severity": "High",
-#             "message_text": "Client setting for &A changed (&B)"},
-#     "EU5": {"audit_class": "System Events", "message_severity": "Low",
-#             "message_text": "Audit log data of &A was deleted (&B data records)"},
-#     "FU0": {"audit_class": "System Events", "message_severity": "High",
-#             "message_text": "Exclusive security audit log medium changed (new status &A)"},
-#     "FUB": {"audit_class": "System Events", "message_severity": "High",
-#             "message_text": "TEMP: Customer-specific event FUB &A &B &C &D"}
-# }
-#
-
 MESSAGE_TEMPLATES = {
     "AU0": {"audit_class": "Other Events", "message_severity": "Low", "message_text": "Audit - Test. Text: &A"},
     "AU1": {"audit_class": "Dialog Logon", "message_severity": "Medium", "message_text": "Logon successful (type=&A, method=&C)"},
@@ -332,5 +289,5 @@ MESSAGE_TEMPLATES = {
     "GU2": {"audit_class": "Other Events", "message_severity": "Low",
             "message_text": "Statistic data for log data enrichment collected till &A ( &B entries )"},
     "NU0": {"audit_class": "Other Events", "message_severity": "Low", "message_text": "Audit - Test. Text: &A"},
-    # Add the rest of the entries in the same format...
+
 }

@@ -8,7 +8,8 @@ VAR_PLACEHOLDERS = ['&A', '&B', '&C', '&D', '&E', '&F', '&G', '&H', '&I', '&J']
 
 
 class LogParser:
-    def __init__(self, file_path, db_session=None, sap_system_id=None, app_server_instance=None, file_checker_id=None, delimiter=None):
+    def __init__(self, file_path, db_session=None, sap_system_id=None, app_server_instance=None, file_checker_id=None,
+                 delimiter=None):
         self.file_path = file_path
         self.db = db_session
         self.sap_system_id = sap_system_id
@@ -30,31 +31,43 @@ class LogParser:
             return False
 
     def _process_audit_file(self):
-
-
         print(f"Processing file: {self.file_path}")
-        print(f"Using delimiter: {self.delimiter}")
+        print(f"Original delimiter: {self.delimiter}")
+
         with open(self.file_path, "r") as f:
             content = f.read()
-        print(f"File content length: {len(content)}")
-        delimiter_pattern = re.compile(r"(" + re.escape(self.delimiter) + r")")
-        segments = re.split(delimiter_pattern, content)
-        print(f"Number of segments: {len(segments)}")
+        print(f"Original file content length: {len(content)}")
+        # stripped_content = content[101:] if len(content) >= 101 else ""
+        print(f"Content length after stripping: {len(content)}")
+        message_classes = list(MESSAGE_TEMPLATES.keys())
+        if not message_classes:
+            raise ValueError("No message classes found in MESSAGE_TEMPLATES")
+        delimiter_escaped = re.escape(self.delimiter)
+        message_class_pattern = '|'.join(re.escape(cls) for cls in message_classes)
+        replacement_pattern = re.compile(f"({delimiter_escaped})({message_class_pattern})")
+        modified_content = replacement_pattern.sub(rf"\1TRNT\2", content)
+        print(f"Modified content length after replacement: {len(modified_content)}")
 
-        parsed_segments = []
-        for i in range(1, len(segments), 2):
-            if i + 1 >= len(segments):
-                continue
-            adjusted_data = segments[i + 1]
-            parsed_segments.append(adjusted_data)
+        new_delimiter = self.delimiter + "TRNT"
+        print(f"New delimiter for splitting: {new_delimiter}")
+        delimiter_pattern = re.compile(re.escape(new_delimiter))
+        parsed_segments = delimiter_pattern.split(modified_content)
 
-        print(f"Parsed segments: {len(parsed_segments)}")
+        print(f"Number of valid parsed segments: {len(parsed_segments)}")
+
         return parsed_segments
 
     def _parse_log_data(self, parsed_segments):
         parsed_logs = []
 
         for data in parsed_segments:
+
+
+            message_id = data[:3]
+            if message_id not in MESSAGE_TEMPLATES:
+                print(f"Skipping segment with unknown message ID '{message_id}'")
+                continue
+
             log_entry = self._create_base_log_entry(data)
 
             index = 35
@@ -111,51 +124,53 @@ class LogParser:
         }
 
     def _extract_field(self, data, start_idx):
-
         try:
-            field_length = int(data[start_idx:start_idx + 4])
+            field_length_str = data[start_idx:start_idx + 4]
+            if not field_length_str.isdigit():
+                print(f"Invalid field length at position {start_idx}: '{field_length_str}'")
+                return "", start_idx + 4
+
+            field_length = int(field_length_str)
 
             if start_idx + 4 + field_length > len(data):
-                print(f"Warning: Field length {field_length} exceeds available data length")
+                print(f"Field length {field_length} exceeds available data at position {start_idx}")
                 return "", start_idx + 4
 
             field_value = data[start_idx + 4:start_idx + 4 + field_length]
             return field_value, start_idx + 4 + field_length
-
-        except ValueError:
-            print(f"Invalid field length at position {start_idx}")
+        except Exception as e:
+            print(f"Error extracting field at {start_idx}: {e}")
             return "", start_idx + 4
 
     def _extract_event_data(self, data, start_idx):
-
-
         try:
-            length = int(data[start_idx:start_idx + 4])
-            end_idx = min(start_idx + 4 + length, len(data))
+            length_str = data[start_idx:start_idx + 4]
+            if not length_str.isdigit():
+                print(f"Invalid event data length at position {start_idx}: '{length_str}'")
+                return [], start_idx + 4
+
+            length = int(length_str)
+            end_idx = start_idx + 4 + length
+
+            if end_idx > len(data):
+                print(f"Event data length {length} exceeds available data at position {start_idx}")
+                return [], start_idx + 4
+
             event_data = data[start_idx + 4:end_idx]
-
             variables = event_data.split('&') if event_data else []
-            return variables, start_idx + 4 + length
-
-        except ValueError:
-            print(f"Invalid event data length at position {start_idx}")
-            return [], start_idx + 4
+            return variables, end_idx
         except Exception as e:
-            print(f"Error extracting event data: {e}")
-            return [], start_idx
+            print(f"Error extracting event data at {start_idx}: {e}")
+            return [], start_idx + 4
 
     def _add_variables_to_log(self, log_entry, variables):
         log_entry["all_variables"] = variables
 
         if variables:
-            if len(variables) > 0:
-                log_entry["first_variable_value"] = variables[0]
-            if len(variables) > 1:
-                log_entry["second_variable_value"] = variables[1]
-            if len(variables) > 2:
-                log_entry["third_variable_value"] = variables[2]
-            if len(variables) > 3:
-                log_entry["other_variable_values"] = "&".join(variables[3:])
+            log_entry["first_variable_value"] = variables[0] if len(variables) > 0 else ""
+            log_entry["second_variable_value"] = variables[1] if len(variables) > 1 else ""
+            log_entry["third_variable_value"] = variables[2] if len(variables) > 2 else ""
+            log_entry["other_variable_values"] = "&".join(variables[3:]) if len(variables) > 3 else ""
 
     def _apply_message_template(self, log_entry):
         message_id = log_entry["message_identifier"]
@@ -191,7 +206,9 @@ class LogParser:
         formatted_time = time_obj.strftime("%I:%M:%S %p")
         return formatted_date, formatted_time
 
-def parse_and_store_logs(file_path: str, db: Session, sap_system_id=None, app_server_instance=None, file_checker_id=None, delimiter=None):
+
+def parse_and_store_logs(file_path: str, db: Session, sap_system_id=None, app_server_instance=None,
+                         file_checker_id=None, delimiter=None):
     try:
         parser = LogParser(
             file_path=file_path,

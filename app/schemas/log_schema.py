@@ -1,4 +1,7 @@
+from typing import List
+
 from pydantic import BaseModel
+from datetime import date
 from datetime import datetime
 
 class LogEntryBase(BaseModel):
@@ -34,5 +37,17 @@ class LogEntryBase(BaseModel):
     class Config:
         orm_mode = True
 
-class LogEntryResponse(LogEntryBase):
-    id: int
+
+
+class LogEntryResponse(BaseModel):
+    total_logs: int
+    logs: List[LogEntryBase]
+
+
+
+class FileCheckResponse(BaseModel):
+    file_id: int
+    last_file_processed: str
+    date: date
+    file_path:str
+    sap_system_id: str
